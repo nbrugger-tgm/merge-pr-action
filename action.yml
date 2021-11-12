@@ -1,11 +1,37 @@
-name: 'Your name here'
-description: 'Provide a description here'
-author: 'Your name or organization here'
+name: 'merge-pr'
+description: 'Merges a pr and returns the created commit sha'
+author: 'nbrugger-tgm'
+branding:
+  icon: 'git-merge'
+  color: 'blue'
 inputs:
-  milliseconds: # change this
+  token:
+    description: 'github token'
     required: true
-    description: 'input description here'
-    default: 'default value if applicable'
+  method:
+    description:  'merge method (squash, merge or rebase)'
+    required: false
+    default: 'merge'
+  title:
+    description: 'merge commit title (if null, it will be defined by github)'
+    required: false
+  message:
+    description: 'commit message (if null, it will be defined by github)'
+    required: false
+  owner:
+    description: 'owner of the repo'
+    required: false
+  repo:
+    description: 'repo name'
+    required: false
+  pull_number:
+    description: 'pull request number to merge'
+    required: true
+
+outputs:
+  commit:
+    description: 'commit sha'
+
 runs:
   using: 'node12'
   main: 'dist/index.js'

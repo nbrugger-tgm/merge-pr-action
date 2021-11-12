@@ -1,0 +1,33 @@
+name: Bump version
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  bump_version:
+    if: "!startsWith(github.event.head_commit.message, 'bump:')"
+    runs-on: ubuntu-latest
+    name: "Bump version and create changelog with commitizen"
+    steps:
+      - name: Check out
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+          token: "${{ secrets.GITHUB_TOKEN }}"
+      - name: Set Node.js 12.x
+        uses: actions/setup-node@v2.4.1
+        with:
+          node-version: 12.x
+      - name: Install dependencies
+        run: npm ci
+      - name: Rebuild the dist/ directory
+        run: npm run build
+      - id: cz
+        name: Create bump and changelog
+        uses: commitizen-tools/commitizen-action@0.9.0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Print Version
+        run: echo "Bumped to version ${{ steps.cz.outputs.version }}"
