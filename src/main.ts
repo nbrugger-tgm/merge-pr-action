@@ -1,19 +1,64 @@
 import * as core from '@actions/core'
-import {wait} from './wait'
+import * as github from '@actions/github'
+import {Config, Method} from './types'
 
 async function run(): Promise<void> {
-  try {
-    const ms: string = core.getInput('milliseconds')
-    core.debug(`Waiting ${ms} milliseconds ...`) // debug is only output if you set the secret `ACTIONS_STEP_DEBUG` to true
-
-    core.debug(new Date().toTimeString())
-    await wait(parseInt(ms, 10))
-    core.debug(new Date().toTimeString())
-
-    core.setOutput('time', new Date().toTimeString())
-  } catch (error) {
-    if (error instanceof Error) core.setFailed(error.message)
+  const pullRequest = github.context.payload.pull_request
+  if (pullRequest === undefined) {
+    return core.error('No pull request found')
   }
+  const conf = getConfig(pullRequest)
+  const client = github.getOctokit(conf.token)
+  const mergeResult = await client.rest.pulls.merge({
+    owner: conf.owner,
+    repo: conf.repo,
+    pull_number: conf.pull_number,
+    commit_title: conf.commit_title,
+    commit_message: conf.commit_message,
+    merge_method: conf.method
+  })
+  //fail when not merged
+  if (!mergeResult.data.merged) {
+    return core.error(`Merge failed : ${mergeResult}`)
+  }
+  core.setOutput('commit', mergeResult.data.sha)
 }
 
 run()
+
+function getOptionalInput(key: string, val: string): string {
+  const input = core.getInput(key)
+  if (input === '') {
+    return val
+  }
+  return input
+}
+
+function getConfig(pullRequest: {number: number}): Config {
+  const owner = getOptionalInput('owner', github.context.repo.owner)
+  const repo = getOptionalInput('repo', github.context.repo.repo)
+  const pull_number: number = +getOptionalInput(
+    'pull_request',
+    pullRequest.number.toString()
+  )
+  const token: string = core.getInput('token')
+  const method: Method = getOptionalInput('method', 'merge') as Method
+  const commit_title: string = core.getInput('commitTitle')
+  const commit_message: string = core.getInput('message')
+  const config: Config = {
+    owner,
+    repo,
+    pull_number,
+    token,
+    method,
+    commit_title,
+    commit_message
+  }
+  if (config.commit_message === '') {
+    config.commit_message = undefined
+  }
+  if (config.commit_title === '') {
+    config.commit_title = undefined
+  }
+  return config
+}
