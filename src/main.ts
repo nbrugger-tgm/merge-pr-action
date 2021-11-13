@@ -8,6 +8,7 @@ async function run(): Promise<void> {
     return core.error('No pull request found')
   }
   const conf = getConfig(pullRequest)
+  core.info(`Run with config : ${JSON.stringify(conf)}`)
   const client = github.getOctokit(conf.token)
   const mergeResult = await client.rest.pulls.merge({
     owner: conf.owner,
@@ -17,6 +18,7 @@ async function run(): Promise<void> {
     commit_message: conf.commit_message,
     merge_method: conf.method
   })
+  core.debug(`Merge result : ${mergeResult}`)
   //fail when not merged
   if (!mergeResult.data.merged) {
     return core.error(`Merge failed : ${mergeResult}`)
