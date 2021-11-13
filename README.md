@@ -1,6 +1,7 @@
 <p align="center">
   <a href="https://github.com/actions/typescript-action/actions"><img alt="typescript-action status" src="https://github.com/actions/typescript-action/workflows/build-test/badge.svg"></a>
 </p>
+
 ## Merge PR
 
 This action will merge your PR. It is just a wrapper for the ``octokit.rest.pulls.merge`` method.
