@@ -40,7 +40,7 @@ jobs:
     if: event.label.name == 'ready for merge'
     steps:
       - name : merge
-        uses : nbrugger-tgm/merge-pr-action@v0.2.0
+        uses : nbrugger-tgm/merge-pr-action@v0.2.1
         with :
           token: ${{ secrets.GITHUB_TOKEN }}
           method: squash
