@@ -7,3 +7,13 @@ export function getOptionalInput(key: string, val: string): string {
   }
   return input
 }
+export function getOptionalComputedInput(
+  key: string,
+  val: () => string
+): string {
+  const input = core.getInput(key)
+  if (input === '') {
+    return val()
+  }
+  return input
+}
