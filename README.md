@@ -14,7 +14,7 @@ This action does not aim to do a lot of automation, but give you atomic access t
 |------|------|-------------|---------------|
 | `owner` | string | The owner of the repository | current repo owner |
 | `repo` | string | The name of the repository | current repo name |
-| `pull_number` | number | The number of the pull request | The number from the event |
+| `pull_request` | number | The number of the pull request | The number from the event |
 | `token` | string | The token to use for authentication | _required_ |
 | `commit_message` | string | The commit message | the message that gh generates |
 | `commit_title` | string | The commit title | the title that gh generates |
