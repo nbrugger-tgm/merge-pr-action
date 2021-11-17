@@ -1,6 +1,53 @@
 require('./sourcemap-register.js');/******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
+/***/ 88:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.getOptionalComputedInput = exports.getOptionalInput = void 0;
+const core = __importStar(__nccwpck_require__(2186));
+function getOptionalInput(key, val) {
+    const input = core.getInput(key);
+    if (input === '') {
+        return val;
+    }
+    return input;
+}
+exports.getOptionalInput = getOptionalInput;
+function getOptionalComputedInput(key, val) {
+    const input = core.getInput(key);
+    if (input === '') {
+        return val();
+    }
+    return input;
+}
+exports.getOptionalComputedInput = getOptionalComputedInput;
+
+
+/***/ }),
+
 /***/ 3109:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -37,13 +84,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(2186));
 const github = __importStar(__nccwpck_require__(5438));
+const config_1 = __nccwpck_require__(88);
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
-        const pullRequest = github.context.payload.pull_request;
-        if (pullRequest === undefined) {
-            return core.error('No pull request found');
-        }
-        const conf = getConfig(pullRequest);
+        const conf = getConfig();
         core.info(`Run with config : ${JSON.stringify(conf)}`);
         const client = github.getOctokit(conf.token);
         const mergeResult = yield client.rest.pulls.merge({
@@ -57,7 +101,11 @@ function run() {
         core.debug(`Merge result : ${mergeResult}`);
         //fail when not merged
         if (!mergeResult.data.merged) {
-            return core.error(`Merge failed : ${mergeResult}`);
+            core.error(`Merge failed : ${mergeResult}`);
+            return;
+        }
+        else {
+            core.info(`Merge seems successfull! Result ${mergeResult}`);
         }
         core.setOutput('commit', mergeResult.data.sha);
     });
@@ -70,10 +118,31 @@ function getOptionalInput(key, val) {
     }
     return input;
 }
-function getConfig(pullRequest) {
+function getConfig() {
     const owner = getOptionalInput('owner', github.context.repo.owner);
     const repo = getOptionalInput('repo', github.context.repo.repo);
-    const pull_number = +getOptionalInput('pull_request', pullRequest.number.toString());
+    let pull_number;
+    let pullRequest = null;
+    if (github.context.eventName === 'pull_request' ||
+        github.context.eventName === 'pull_request_target') {
+        pull_number = +(0, config_1.getOptionalComputedInput)('pull_request', () => {
+            pullRequest = github.context.payload.pull_request;
+            if (pullRequest === undefined) {
+                throw new Error('Could not get pull_request from event!');
+            }
+            return pullRequest.number.toString();
+        });
+    }
+    else {
+        if (core.getInput('pull_request') === '') {
+            core.error("Couldn't get default pr number" +
+                " because this action was not triggered by 'pull_request' or 'pull_request_target' event." +
+                " When using any other event 'pull_request' input is required");
+            throw new Error('Could not fall back to pull_request from event!');
+        }
+        else
+            pull_number = +core.getInput('pull_request');
+    }
     const token = core.getInput('token');
     const method = getOptionalInput('method', 'merge');
     const commit_title = core.getInput('commitTitle');

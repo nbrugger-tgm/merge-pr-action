@@ -1,3 +1,9 @@
+## v0.2.2 (2021-11-17)
+
+### Fix
+
+- action not being able to run on non `pull_request` event (#9)
+
 ## v0.2.1 (2021-11-17)
 
 ### Fix
