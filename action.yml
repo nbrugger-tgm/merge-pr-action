@@ -24,7 +24,7 @@ inputs:
   repo:
     description: 'repo name'
     required: false
-  pull_number:
+  pull_request:
     description: 'pull request number to merge'
     required: true
 
