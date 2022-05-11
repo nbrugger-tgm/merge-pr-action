@@ -27,7 +27,7 @@ jobs:
         run: npm run all
       - id: cz
         name: Create bump and changelog
-        uses: commitizen-tools/commitizen-action@0.12.0
+        uses: commitizen-tools/commitizen-action@0.13.2
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           branch: ${{ github.event.ref }}
