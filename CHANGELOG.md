@@ -1,3 +1,9 @@
+## v0.2.3 (2022-10-12)
+
+### Fix
+
+- **deps-dev**: bump eslint-plugin-jest from 25.7.0 to 26.1.1 (#38)
+
 ## v0.2.2 (2021-11-17)
 
 ### Fix
